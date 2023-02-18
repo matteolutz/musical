@@ -9,17 +9,25 @@ import SoundEffect from "../../models/soundEffect.model";
 import SoundEffectComponent from "../../components/SoundEffectComponent";
 import {useRefState} from "../../utils/state";
 import {convertMilliseconds} from "../../utils/time";
+import ModalComponent from "../../components/ModalComponent";
 
-const Perform: FC = () => {
+type PerformProps = {
+    initialSceneIndex?: number;
+    isPeek?: boolean;
+}
+
+const Perform: FC<PerformProps> = ({initialSceneIndex, isPeek = false}) => {
 
     const [serialisation, setSerialisation, serialisationRef] = useRefState<Serialisation | undefined>(undefined);
 
-    const [currentSceneIndex, setCurrentSceneIndex, currentSceneIndexRef] = useRefState<number>(0);
+    const [currentSceneIndex, setCurrentSceneIndex, currentSceneIndexRef] = useRefState<number>(initialSceneIndex || 0);
 
     const [currentSoundEffectIndex, setCurrentSoundEffectIndex, currentSoundEffectIndexRef] = useRefState<number>(-1);
     const [soundEffectRefs, setSoundEffectRefs, soundEffectRefsRef] = useRefState<RefObject<HTMLAudioElement>[]>([]);
 
     const [sceneTime, setSceneTime] = useState<number>(0);
+
+    const [showNextSceneModal, setShowNextSceneModal] = useState<boolean>(false);
 
     const nextScene = () => {
         if (!serialisationRef.current) return;
@@ -84,15 +92,16 @@ const Perform: FC = () => {
         const serialisationData = {...TEST_SERIALIZATION_DATA};
         setSerialisation(serialisationData);
 
-        document.addEventListener("keydown", keyHandler);
+        !isPeek && document.addEventListener("keydown", keyHandler);
 
-        return () => {
+        return isPeek ? () => {
+        } : () => {
             document.removeEventListener("keydown", keyHandler);
         }
     }, []);
 
     useEffect(() => {
-        if (!serialisation) return;
+        if (!serialisation || isPeek) return;
         setSoundEffectRefs(
             Array(serialisation.scenes[currentSceneIndex].soundEffects.length)
                 .fill(undefined)
@@ -101,6 +110,10 @@ const Perform: FC = () => {
     }, [serialisation]);
 
     useEffect(() => {
+        setShowNextSceneModal(false);
+
+        if (isPeek) return;
+
         const sceneBegin = Date.now();
         const interval = setInterval(() => {
             setSceneTime(Date.now() - sceneBegin);
@@ -158,6 +171,10 @@ const Perform: FC = () => {
 
     return (
         <div className="perform__grid__container">
+            {(showNextSceneModal && currentSceneIndex < serialisation.scenes.length - 1) &&
+                <ModalComponent title={"123"} closeModal={() => setShowNextSceneModal(false)}>
+                    <Perform initialSceneIndex={currentSceneIndex + 1} isPeek={true}/>
+                </ModalComponent>}
             <div className="perform__grid__row">
                 <div className="perform__grid__row__title">Audio</div>
                 <div className="perform__grid__sound">
@@ -248,8 +265,9 @@ const Perform: FC = () => {
                 {currentSceneIndex < serialisation.scenes.length - 1 && (
                     <div
                         className="perform__grid__bottom-bar__next-scene">
-                        <div
-                            className="perform__grid__bottom-bar__next-scene__name">{serialisation.scenes[currentSceneIndex + 1].name}</div>
+                        <div role="button" tabIndex={0} onClick={() => setShowNextSceneModal(true)}
+                             style={{cursor: "pointer"}}
+                             className="perform__grid__bottom-bar__next-scene__name">{serialisation.scenes[currentSceneIndex + 1].name}</div>
                         <div
                             className="perform__grid__bottom-bar__next-scene__keyword">{serialisation.scenes[currentSceneIndex + 1].keyword}</div>
                     </div>
