@@ -1,24 +1,24 @@
-import {FaderState} from "./fader.model";
-import SoundEffect from "./soundEffect.model";
+import { type FaderState } from './fader.model';
+import type SoundEffect from './soundEffect.model';
 
 interface Scene {
-    order: number;
+  order: number;
 
+  name: string;
+
+  faderStates: FaderState[];
+
+  soundEffects: SoundEffect[];
+
+  lightPreset: {
     name: string;
+    isBlackout: boolean;
+    masterValue: number;
+  };
 
-    faderStates: FaderState[];
+  notes: string;
 
-    soundEffects: Array<SoundEffect>
-
-    lightPreset: {
-        name: string;
-        isBlackout: boolean;
-        masterValue: number;
-    };
-
-    notes: string;
-
-    keyword: string;
+  keyword: string;
 }
 
 export default Scene;

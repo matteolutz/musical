@@ -1,7 +1,7 @@
 interface SoundEffect {
-    name: string;
-    keyword: string;
-    file: string;
+  name: string;
+  keyword: string;
+  file: string;
 }
 
 export default SoundEffect;

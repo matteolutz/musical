@@ -1,9 +1,9 @@
-import Fader from "./fader.model";
-import Scene from "./scene.model";
+import type Fader from './fader.model';
+import type Scene from './scene.model';
 
 interface Serialisation {
-    faders: Array<Fader>;
-    scenes: Array<Scene>;
+  faders: Fader[];
+  scenes: Scene[];
 }
 
 export default Serialisation;
